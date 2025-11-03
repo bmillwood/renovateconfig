@@ -1,0 +1,8 @@
+{
+    "onboarding": false,
+    "repositories": [
+        "bmillwood/bluesky-tools",
+        "bmillwood/delivery-status-notification",
+        "bmillwood/renovateconfig"
+    ]
+}
