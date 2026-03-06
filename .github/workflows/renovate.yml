@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
-    - uses: renovatebot/github-action@v46.0.0
+    - uses: renovatebot/github-action@v46.1.3
       with:
         token: ${{ secrets.RENOVATE_TOKEN }}
         configurationFile: ./renovatebot.json
