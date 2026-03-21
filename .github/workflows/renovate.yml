@@ -1,7 +1,7 @@
 name: Upgrade dependencies
 on:
-  schedule:
-  - cron: "30 17 * * 5" # Friday afternoon
+#  schedule:
+#  - cron: "30 17 * * 5" # Friday afternoon
   workflow_dispatch:
 
 jobs:
