@@ -5,12 +5,16 @@ on:
         required: true
       RENOVATE_APP_PRIVATE_KEY:
         required: true
+    inputs:
+      dryRun:
+        type: boolean
+        default: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   upgrade-dependencies:
     runs-on: ubuntu-latest
     env:
-      RENOVATE_DRY_RUN: ${{ github.event_name == 'pull_request' && 'full' || '' }}
+      RENOVATE_DRY_RUN: ${{ inputs.dryRun && 'full' || '' }}
       RENOVATE_ONBOARDING: false
       RENOVATE_REPOSITORIES: ${{ github.repository }}
       RENOVATE_EXTENDS: config:recommended,helpers:pinGitHubActionDigestsToSemver
