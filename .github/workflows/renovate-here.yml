@@ -1,0 +1,15 @@
+name: Upgrade dependencies
+on:
+#  schedule:
+#  - cron: "30 17 * * 5" # Friday afternoon
+  workflow_dispatch:
+  pull_request:
+    paths:
+    - .github/renovate.json
+    - .github/workflows/renovate-here.yml
+    - .github/workflows/renovate.yml
+
+jobs:
+  upgrade:
+    uses: ./.github/workflows/renovate.yml
+    secrets: inherit
