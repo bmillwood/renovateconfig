@@ -7,8 +7,7 @@ on:
         required: true
 
 jobs:
-  upgrade:
-    name: Upgrade dependencies
+  upgrade-dependencies:
     runs-on: ubuntu-latest
     env:
       RENOVATE_DRY_RUN: ${{ github.event_name == 'pull_request' }}
