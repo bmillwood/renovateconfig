@@ -2,6 +2,10 @@ on:
   schedule:
   - cron: "30 17 * * 5" # Friday afternoon
   workflow_dispatch:
+    inputs:
+      dryRun:
+        type: boolean
+        default: false
   pull_request:
     paths:
     - .github/renovate.json
@@ -11,4 +15,6 @@ on:
 jobs:
   upgrade:
     uses: ./.github/workflows/renovate.yml
+    with:
+      dryRun: ${{ inputs.dryRun || github.event_name == 'pull_request' }}
     secrets: inherit
