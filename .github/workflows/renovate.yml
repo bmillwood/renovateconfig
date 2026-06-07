@@ -29,6 +29,8 @@ jobs:
       RENOVATE_COMMIT_BODY: >-
         {{#each upgrades}}New-{{{datasource}}}-version: {{{depName}}}{{#if newVersion}}=={{{newVersion}}}{{else if newDigest}}=={{{newDigest}}}{{/if}}\n{{/each}}
       LOG_LEVEL: debug
+      LOG_FILE: /tmp/renovate-log.jsonl
+      LOG_FILE_LEVEL: warn
     steps:
     - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
       id: app-token
@@ -47,3 +49,7 @@ jobs:
       with:
         renovate-version: 43.214.4 # renovate: datasource=docker depName=ghcr.io/renovatebot/renovate
         token: ${{ steps.app-token.outputs.token }}
+    - name: Show warnings and errors (JSON)
+      run: |
+        wc -cl "$LOG_FILE"
+        cat "$LOG_FILE"
