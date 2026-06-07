@@ -10,7 +10,7 @@ jobs:
   upgrade-dependencies:
     runs-on: ubuntu-latest
     env:
-      RENOVATE_DRY_RUN: ${{ github.event_name == 'pull_request' }}
+      RENOVATE_DRY_RUN: ${{ github.event_name == 'pull_request' && 'full' || '' }}
       RENOVATE_ONBOARDING: false
       RENOVATE_REPOSITORIES: ${{ github.repository }}
       RENOVATE_EXTENDS: config:recommended,helpers:pinGitHubActionDigestsToSemver
@@ -27,12 +27,7 @@ jobs:
           }
         ]
       RENOVATE_COMMIT_BODY: >-
-        {{#each upgrades}}
-          New-{{{datasource}}}-version: {{{depName}}}
-          {{#if newVersion}}=={{{newVersion}}}
-          {{else if newDigest}}=={{{newDigest}}}
-          {{/if}}\n
-        {{/each}}
+        {{#each upgrades}}New-{{{datasource}}}-version: {{{depName}}}{{#if newVersion}}=={{{newVersion}}}{{else if newDigest}}=={{{newDigest}}}{{/if}}\n{{/each}}
       LOG_LEVEL: debug
     steps:
     - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
