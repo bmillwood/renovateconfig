@@ -14,6 +14,26 @@ jobs:
       RENOVATE_DRY_RUN: ${{ github.event_name == 'pull_request' }}
       RENOVATE_ONBOARDING: false
       RENOVATE_REPOSITORIES: ${{ github.repository }}
+      RENOVATE_EXTENDS: config:recommended,helpers:pinGitHubActionDigestsToSemver
+      RENOVATE_CUSTOM_MANAGERS: >-
+        [
+          {
+            "customType": "regex",
+            "description": "Update *[-_]version parameters",
+            "managerFilePatterns": [".github/workflows/*"],
+            "matchStrings": [
+              "[-_]version:\\s*(?<currentValue>[0-9.]+)\\s*# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>\\S+)",
+              "[-_]version:\\s*(?<currentDigest>[a-f0-9]{40})\\s*# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>\\S+) packageName=(?<packageName>\\S+) currentValue=(?<currentValue>\\S+)"
+            ]
+          }
+        ]
+      RENOVATE_COMMIT_BODY: >-
+        {{#each upgrades}}
+          New-{{{datasource}}}-version: {{{depName}}}
+          {{#if newVersion}}=={{{newVersion}}}
+          {{else if newDigest}}=={{{newDigest}}}
+          {{/if}}\n
+        {{/each}}
       LOG_LEVEL: debug
     steps:
     - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
