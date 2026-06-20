@@ -14,10 +14,19 @@ jobs:
   upgrade-dependencies:
     runs-on: ubuntu-latest
     env:
-      RENOVATE_DRY_RUN: ${{ inputs.dryRun && 'full' || '' }}
       RENOVATE_ONBOARDING: false
       RENOVATE_REPOSITORIES: ${{ github.repository }}
       RENOVATE_EXTENDS: config:recommended,helpers:pinGitHubActionDigestsToSemver
+      # Noisy, but IME a lot of what you care about is at debug level.
+      LOG_LEVEL: debug
+
+      RENOVATE_DRY_RUN: ${{ inputs.dryRun && 'full' || '' }}
+      # Use config from the branch for PRs and workflow_dispatch
+      # I'd rather have "replace" than "merge", but as far as I can tell that
+      # doesn't exist.
+      RENOVATE_USE_BASE_BRANCH_CONFIG: merge
+      RENOVATE_BASE_BRANCH_PATTERNS: ${{ github.head_ref || github.ref_name }}
+
       RENOVATE_CUSTOM_MANAGERS: >-
         [
           {
@@ -30,9 +39,14 @@ jobs:
             ]
           }
         ]
+
+      # I use this in Haskell packages to ensure CI actually uses the new
+      # verison.
       RENOVATE_COMMIT_BODY: >-
         {{#each upgrades}}New-{{{datasource}}}-version: {{{depName}}}{{#if newVersion}}=={{{newVersion}}}{{else if newDigest}}=={{{newDigest}}}{{/if}}\n{{/each}}
-      LOG_LEVEL: debug
+
+      # This is just a crude way to find out if there were any warnings or
+      # errors.
       RENOVATE_LOG_FILE: /tmp/renovate-log.jsonl
       RENOVATE_LOG_FILE_LEVEL: warn
     steps:
