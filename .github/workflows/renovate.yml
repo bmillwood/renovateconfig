@@ -65,7 +65,7 @@ jobs:
         # let's add another layer of protection.
         permission-pull-requests: "${{ github.event_name == 'pull_request' && 'read' || 'write' }}"
     - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-    - uses: renovatebot/github-action@693b9ef15eec82123529a37c782242f091365961 # v46.1.14
+    - uses: renovatebot/github-action@22e0a16091fc706b04affe6ae53d5e3358ac4023 # v46.1.19
       with:
         renovate-version: 43.268.4 # renovate: datasource=docker depName=ghcr.io/renovatebot/renovate
         token: ${{ steps.app-token.outputs.token }}
