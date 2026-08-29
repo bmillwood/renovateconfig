@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Apply my standard configuration to the named GitHub repos, or to the current
+# one if you don't name any.
+#
+# So far that's only the Renovate app credentials. GitHub has no user-level
+# Actions secrets, so every repo that runs .github/workflows/renovate.yml needs
+# its own copy of these two. Repo settings and branch protection rulesets are
+# meant to end up here too.
+set -o errexit
+set -o nounset
+set -o pipefail
+shopt -s nullglob
+
+app_dir=${RENOVATE_APP_DIR:-$HOME/.config/renovate-app}
+
+renovate_secrets() {
+  local repo=$1
+  # $(<file) drops the trailing newline GitHub leaves on the downloaded client
+  # ID. The private key goes over stdin instead, both to keep its newlines and
+  # to keep it out of the process table.
+  gh secret set RENOVATE_APP_CLIENT_ID --repo "$repo" --body "$(<"$app_dir/client_id.txt")"
+  gh secret set RENOVATE_APP_PRIVATE_KEY --repo "$repo" < "$private_key"
+}
+
+repos=("$@")
+if [ "${#repos[@]}" -eq 0 ]; then
+  repos=("$(gh repo view --json nameWithOwner --jq .nameWithOwner)")
+fi
+
+# Resolved before we touch any repo, and an error rather than a coin flip, so
+# that a rotation which leaves the superseded key lying around can't quietly
+# win.
+private_keys=("$app_dir"/*.private-key.pem)
+if [ "${#private_keys[@]}" -ne 1 ]; then
+  echo "want exactly one *.private-key.pem in $app_dir, found ${#private_keys[@]}" >&2
+  exit 1
+fi
+private_key=${private_keys[0]}
+
+for repo in "${repos[@]}"; do
+  renovate_secrets "$repo"
+done
