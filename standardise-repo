@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# Apply my standard configuration to the named GitHub repos, or to the current
+# one if you don't name any.
+#
+# So far that's only the Renovate app credentials. GitHub has no user-level
+# Actions secrets, so every repo that runs .github/workflows/renovate.yml needs
+# its own copy of these two. Repo settings and branch protection rulesets are
+# meant to end up here too.
+set -o errexit
+set -o nounset
+set -o pipefail
+shopt -s nullglob
+
+app_dir=${RENOVATE_APP_DIR:-$HOME/.config/renovate-app}
+
+# Sets $private_key. Deferred until something actually needs installing, so
+# that standardising an already-configured repo doesn't demand the key be to
+# hand. Fails rather than picking one, so a rotation that leaves the superseded
+# key lying around can't quietly win.
+find_private_key() {
+  local keys=("$app_dir"/*.private-key.pem)
+  if [ "${#keys[@]}" -ne 1 ]; then
+    echo "want exactly one *.private-key.pem in $app_dir, found ${#keys[@]}" >&2
+    exit 1
+  fi
+  private_key=${keys[0]}
+}
+
+# Secrets that already exist are left alone. They're write-only, so there's no
+# telling a current one from a stale one, and overwriting regardless would make
+# every run a rotation you didn't ask for. Delete one by hand to refresh it.
+renovate_secrets() {
+  local repo=$1
+  local existing
+  existing=$(gh secret list --repo "$repo" --json name --jq '.[].name')
+  # Values go over stdin, which gh strips the trailing newline from and which
+  # keeps them out of the process table.
+  if ! grep -qxF RENOVATE_APP_CLIENT_ID <<< "$existing"; then
+    gh secret set RENOVATE_APP_CLIENT_ID --repo "$repo" < "$app_dir/client_id.txt"
+  fi
+  if ! grep -qxF RENOVATE_APP_PRIVATE_KEY <<< "$existing"; then
+    find_private_key
+    gh secret set RENOVATE_APP_PRIVATE_KEY --repo "$repo" < "$private_key"
+  fi
+}
+
+repos=("$@")
+if [ "${#repos[@]}" -eq 0 ]; then
+  repos=("$(gh repo view --json nameWithOwner --jq .nameWithOwner)")
+fi
+
+for repo in "${repos[@]}"; do
+  renovate_secrets "$repo"
+done
