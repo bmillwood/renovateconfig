@@ -33,14 +33,13 @@ renovate_secrets() {
   local repo=$1
   local existing
   existing=$(gh secret list --repo "$repo" --json name --jq '.[].name')
+  # Values go over stdin, which gh strips the trailing newline from and which
+  # keeps them out of the process table.
   if ! grep -qxF RENOVATE_APP_CLIENT_ID <<< "$existing"; then
-    # $(<file) drops the trailing newline GitHub leaves on the downloaded ID.
-    gh secret set RENOVATE_APP_CLIENT_ID --repo "$repo" --body "$(<"$app_dir/client_id.txt")"
+    gh secret set RENOVATE_APP_CLIENT_ID --repo "$repo" < "$app_dir/client_id.txt"
   fi
   if ! grep -qxF RENOVATE_APP_PRIVATE_KEY <<< "$existing"; then
     find_private_key
-    # Over stdin, both to keep the PEM's newlines and to keep it out of the
-    # process table.
     gh secret set RENOVATE_APP_PRIVATE_KEY --repo "$repo" < "$private_key"
   fi
 }
