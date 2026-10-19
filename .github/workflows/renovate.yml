@@ -52,6 +52,16 @@ jobs:
           },
         ]
 
+      RENOVATE_PACKAGE_RULES: |
+        [
+          // overriding https://docs.renovatebot.com/presets-helpers/#helperspingithubactiondigeststosemver
+          {
+            "description": "Re-allow major-only versions for actions that don't have patch versions",
+            "matchPackageNames": ["cachix/cachix-action"],
+            "extractVersion": "^(?<version>v?\\d+(\\.\\d+\\.\\d+)?)$",
+          },
+        ]
+
       # I use this in Haskell packages to ensure CI actually uses the new
       # verison.
       RENOVATE_COMMIT_BODY: >-
