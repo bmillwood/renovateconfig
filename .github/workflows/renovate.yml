@@ -16,7 +16,7 @@ jobs:
     env:
       RENOVATE_ONBOARDING: false
       RENOVATE_REPOSITORIES: ${{ github.repository }}
-      RENOVATE_EXTENDS: config:recommended,helpers:pinGitHubActionDigestsToSemver
+      RENOVATE_EXTENDS: config:recommended,helpers:pinGitHubActionDigests
       # Noisy, but IME a lot of what you care about is at debug level.
       LOG_LEVEL: debug
 
@@ -49,16 +49,6 @@ jobs:
             // "versioning" is the wrong parameter to configure this, it only
             // affects extracting versions, not deciding on new ones
             "versioningTemplate": "exact",
-          },
-        ]
-
-      RENOVATE_PACKAGE_RULES: |
-        [
-          // overriding https://docs.renovatebot.com/presets-helpers/#helperspingithubactiondigeststosemver
-          {
-            "description": "Re-allow major-only versions for actions that don't have patch versions",
-            "matchPackageNames": ["cachix/cachix-action"],
-            "extractVersion": "^(?<version>v?\\d+(\\.\\d+\\.\\d+)?)$",
           },
         ]
 
