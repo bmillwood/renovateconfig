@@ -27,7 +27,7 @@ runs:
       # let's add another layer of protection.
       permission-pull-requests: "${{ github.event_name == 'pull_request' && 'read' || 'write' }}"
       permission-vulnerability-alerts: read
-  - run: ${{ github.action_path }}/../../renovate.sh "$GITHUB_REPOSITORY"
+  - run: '"$GITHUB_ACTION_PATH/../../renovate.sh" "$GITHUB_REPOSITORY"'
     shell: bash
     env:
       RENOVATE_TOKEN: ${{ steps.app-token.outputs.token }}
