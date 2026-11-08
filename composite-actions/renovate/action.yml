@@ -27,13 +27,9 @@ runs:
       # let's add another layer of protection.
       permission-pull-requests: "${{ github.event_name == 'pull_request' && 'read' || 'write' }}"
       permission-vulnerability-alerts: read
-  - run: ${{ github.action_path }}/renovate "$GITHUB_REPOSITORY"
+  - run: ${{ github.action_path }}/../../renovate.sh "$GITHUB_REPOSITORY"
     shell: bash
     env:
       RENOVATE_TOKEN: ${{ steps.app-token.outputs.token }}
-      RENOVATE_DRY_RUN: ${{ inputs.dry-run == 'true' && 'full' || '' }}
-      # Use config from the branch for PRs and workflow_dispatch
-      # I'd rather have "replace" than "merge", but as far as I can tell that
-      # doesn't exist.
-      RENOVATE_USE_BASE_BRANCH_CONFIG: merge
+      RENOVATE_DRY_RUN: ${{ inputs.dry-run == 'true' && 'full' || 'null' }}
       RENOVATE_BASE_BRANCH_PATTERNS: ${{ github.head_ref || github.ref_name }}
