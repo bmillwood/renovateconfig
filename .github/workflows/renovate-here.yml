@@ -16,10 +16,7 @@ jobs:
   upgrade-dependencies:
     runs-on: ubuntu-latest
     steps:
-    # $/ would avoid the checkout, but actionlint doesn't support it yet:
-    # https://github.com/rhysd/actionlint/issues/711
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-    - uses: ./composite-actions/renovate
+    - uses: $/composite-actions/renovate
       with:
         app-client-id: ${{ secrets.RENOVATE_APP_CLIENT_ID }}
         app-private-key: ${{ secrets.RENOVATE_APP_PRIVATE_KEY }}
