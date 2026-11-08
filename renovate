@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+# Run Renovate, with my usual configuration, on the repos named as arguments.
+#
+# Configuration is by environment variable: anything set already wins over the
+# defaults below (set one to the empty string to clear it), and everything
+# Renovate reads from the environment is passed through to its container.
+# You need at least RENOVATE_TOKEN, e.g. for a local dry run:
+#
+#   RENOVATE_TOKEN=$(gh auth token) RENOVATE_DRY_RUN=full ./renovate bmillwood/freecell
+#
+# action.yml is a thin wrapper around this for use in GitHub Actions.
+set -o errexit
+set -o nounset
+set -o pipefail
+
+renovate_image=ghcr.io/renovatebot/renovate:44.221.6
+
+default() {
+  local name=$1 value=$2
+  [[ -v $name ]] || export "$name=$value"
+}
+
+default RENOVATE_ONBOARDING false
+default RENOVATE_EXTENDS config:recommended,helpers:pinGitHubActionDigests
+# Noisy, but IME a lot of what you care about is at debug level.
+default LOG_LEVEL debug
+
+default RENOVATE_CUSTOM_MANAGERS "$(cat <<'EOF'
+[
+  {
+    "customType": "regex",
+    "description": "Update versions anywhere, using marker comments",
+    "managerFilePatterns": [".github/workflows/*"],
+    "matchStrings": [
+      ":\\s*(?<currentValue>[0-9.]+)\\s*# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>\\S+)",
+    ],
+  },
+  {
+    "customType": "regex",
+    "description": "Update git digests of branches anywhere, using marker comments",
+    "managerFilePatterns": [".github/workflows/*"],
+    "matchStrings": [
+      ":\\s*(?<currentDigest>[a-f0-9]{40})\\s*# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>\\S+) packageName=(?<packageName>\\S+) currentValue=(?<currentValue>\\S+)",
+    ],
+    // when I'm trying to update a digest, I usually don't want to also
+    // update the currentValue
+    // "versioning" is the wrong parameter to configure this, it only
+    // affects extracting versions, not deciding on new ones
+    "versioningTemplate": "exact",
+  },
+]
+EOF
+)"
+
+# I use this in Haskell packages to ensure CI actually uses the new verison.
+default RENOVATE_COMMIT_BODY '{{#each upgrades}}New-{{{datasource}}}-version: {{{depName}}}{{#if newVersion}}=={{{newVersion}}}{{else if newDigest}}=={{{newDigest}}}{{/if}}\n{{/each}}'
+
+default RENOVATE_PR_HOURLY_LIMIT 0
+
+# This is just a crude way to find out if there were any warnings or errors.
+# The directory has to be writable by the container's (unprivileged) user.
+log_dir=$(mktemp --directory)
+trap 'rm -rf "$log_dir"' EXIT
+chmod a+rwx "$log_dir"
+export RENOVATE_LOG_FILE=/renovate-log/log.jsonl
+export RENOVATE_LOG_FILE_LEVEL=warn
+
+# The same set of variables that renovatebot/github-action passes through.
+env_args=()
+while read -r name; do
+  env_args+=(--env "$name")
+done < <(compgen -e | grep -E '^(RENOVATE_\w+|LOG_LEVEL|GITHUB_COM_TOKEN|NODE_OPTIONS|NO_COLOR|(HTTPS?|NO)_PROXY|(https?|no)_proxy)$')
+
+docker run --rm \
+  "${env_args[@]}" \
+  --env FORCE_COLOR=3 \
+  --volume "$log_dir:/renovate-log" \
+  "$renovate_image" \
+  "$@"
+
+if [ -s "$log_dir/log.jsonl" ]; then
+  cat "$log_dir/log.jsonl"
+  exit 1
+fi

@@ -1,0 +1,39 @@
+name: Renovate
+description: >-
+  Run Renovate on the current repo with bmillwood's usual configuration. Set
+  RENOVATE_* environment variables on the step to override or add to it.
+
+inputs:
+  app-client-id:
+    required: true
+  app-private-key:
+    required: true
+  dry-run:
+    default: ${{ github.event_name == 'pull_request' }}
+
+runs:
+  using: composite
+  steps:
+  - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+    id: app-token
+    with:
+      client-id: ${{ inputs.app-client-id }}
+      private-key: ${{ inputs.app-private-key }}
+      permission-contents: write
+      permission-issues: write
+      permission-workflows: write
+      # When run from a PR, it should be in dry-run mode, so shouldn't create PRs.
+      # But if it did, it's not too hard to imagine a PR creation loop. So
+      # let's add another layer of protection.
+      permission-pull-requests: "${{ github.event_name == 'pull_request' && 'read' || 'write' }}"
+      permission-vulnerability-alerts: read
+  - run: ${{ github.action_path }}/renovate "$GITHUB_REPOSITORY"
+    shell: bash
+    env:
+      RENOVATE_TOKEN: ${{ steps.app-token.outputs.token }}
+      RENOVATE_DRY_RUN: ${{ inputs.dry-run == 'true' && 'full' || '' }}
+      # Use config from the branch for PRs and workflow_dispatch
+      # I'd rather have "replace" than "merge", but as far as I can tell that
+      # doesn't exist.
+      RENOVATE_USE_BASE_BRANCH_CONFIG: merge
+      RENOVATE_BASE_BRANCH_PATTERNS: ${{ github.head_ref || github.ref_name }}
