@@ -8,13 +8,16 @@ on:
         default: false
   pull_request:
     paths:
-    - .github/renovate.json
     - .github/workflows/renovate-here.yml
-    - .github/workflows/renovate.yml
+    - composite-actions/renovate/action.yml
+    - renovate.sh
 
 jobs:
-  upgrade:
-    uses: ./.github/workflows/renovate.yml
-    with:
-      dryRun: ${{ inputs.dryRun || github.event_name == 'pull_request' }}
-    secrets: inherit
+  upgrade-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: $/composite-actions/renovate
+      with:
+        app-client-id: ${{ secrets.RENOVATE_APP_CLIENT_ID }}
+        app-private-key: ${{ secrets.RENOVATE_APP_PRIVATE_KEY }}
+        dry-run: ${{ inputs.dryRun || github.event_name == 'pull_request' }}
