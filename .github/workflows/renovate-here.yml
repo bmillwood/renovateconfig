@@ -14,6 +14,14 @@ on:
 
 jobs:
   upgrade-dependencies:
+    strategy:
+      fail-fast: false
+      matrix:
+        repo:
+          - ${{ github.repository }}
+          - bmillwood/bluesky-tools
+          - bmillwood/freecell
+          - bmillwood/nur-packages
     runs-on: ubuntu-latest
     steps:
     - uses: $/composite-actions/renovate
@@ -21,3 +29,4 @@ jobs:
         app-client-id: ${{ secrets.RENOVATE_APP_CLIENT_ID }}
         app-private-key: ${{ secrets.RENOVATE_APP_PRIVATE_KEY }}
         dry-run: ${{ inputs.dryRun || github.event_name == 'pull_request' }}
+        repository: ${{ matrix.repo }}

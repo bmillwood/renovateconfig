@@ -10,6 +10,8 @@ inputs:
     required: true
   dry-run:
     default: ${{ github.event_name == 'pull_request' }}
+  repository:
+    default: ${{ github.repository }}
 
 runs:
   using: composite
@@ -27,9 +29,10 @@ runs:
       # let's add another layer of protection.
       permission-pull-requests: "${{ github.event_name == 'pull_request' && 'read' || 'write' }}"
       permission-vulnerability-alerts: read
-  - run: '"$GITHUB_ACTION_PATH/../../renovate.sh" "$GITHUB_REPOSITORY"'
+      repository: ${{ inputs.repository }}
+  - run: '$GITHUB_ACTION_PATH/../../renovate.sh'
     shell: bash
     env:
+      RENOVATE_REPOSITORIES: ${{ inputs.repository }}
       RENOVATE_TOKEN: ${{ steps.app-token.outputs.token }}
       RENOVATE_DRY_RUN: ${{ inputs.dry-run == 'true' && 'full' || 'null' }}
-      RENOVATE_BASE_BRANCH_PATTERNS: ${{ github.head_ref || github.ref_name }}
