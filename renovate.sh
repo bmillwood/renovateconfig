@@ -22,7 +22,7 @@ default() {
 }
 
 default RENOVATE_DRY_RUN full
-default RENOVATE_REQUIRE_CONFIG ignored
+default RENOVATE_REQUIRE_CONFIG optional
 default RENOVATE_ONBOARDING false
 default RENOVATE_EXTENDS config:recommended,helpers:pinGitHubActionDigests
 # Noisy, but IME a lot of what you care about is at debug level.
