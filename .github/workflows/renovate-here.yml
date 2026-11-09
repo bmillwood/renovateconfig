@@ -15,6 +15,7 @@ on:
 jobs:
   upgrade-dependencies:
     strategy:
+      fail-fast: false
       matrix:
         repo:
           - ${{ github.repository }}
