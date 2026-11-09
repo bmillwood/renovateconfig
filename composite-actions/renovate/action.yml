@@ -29,7 +29,7 @@ runs:
       # let's add another layer of protection.
       permission-pull-requests: "${{ github.event_name == 'pull_request' && 'read' || 'write' }}"
       permission-vulnerability-alerts: read
-      repository: ${{ inputs.repository }}
+      repositories: ${{ inputs.repository }}
   - run: '$GITHUB_ACTION_PATH/../../renovate.sh'
     shell: bash
     env:
