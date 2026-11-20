@@ -8,7 +8,7 @@ on:
         default: false
   pull_request:
     paths:
-    - .github/workflows/renovate-here.yml
+    - .github/workflows/renovate.yml
     - composite-actions/renovate/action.yml
     - renovate.sh
 
@@ -22,6 +22,7 @@ jobs:
           - bmillwood/bluesky-tools
           - bmillwood/freecell
           - bmillwood/nur-packages
+          - bmillwood/skerrible
     runs-on: ubuntu-latest
     steps:
     - uses: $/composite-actions/renovate
