@@ -14,7 +14,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-renovate_image=ghcr.io/renovatebot/renovate:44.256.1@sha256:7138934c013df961d92acf6e3f1326f9dc705ed3d02e399ac0a3395d777182ff # renovate: datasource=docker
+renovate_image=ghcr.io/renovatebot/renovate:44.257.5@sha256:d57dca79611ee02af29f1243d27956618a291e6364294ea8ae17629b2e66696f # renovate: datasource=docker
 
 default() {
   local name=$1 value=$2
