@@ -21,9 +21,12 @@ jobs:
       matrix:
         repo:
           - ${{ github.repository }}
+          - bmillwood/.github
           - bmillwood/bluesky-tools
           - bmillwood/freecell
+          - bmillwood/igzing
           - bmillwood/nur-packages
+          - bmillwood/pointfree
           - bmillwood/skerrible
     runs-on: ubuntu-latest
     env:
