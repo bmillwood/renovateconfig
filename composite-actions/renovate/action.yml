@@ -4,9 +4,7 @@ description: >-
   RENOVATE_* environment variables on the step to override or add to it.
 
 inputs:
-  app-client-id:
-    required: true
-  app-private-key:
+  token:
     required: true
   dry-run:
     default: ${{ github.event_name == 'pull_request' }}
@@ -16,23 +14,9 @@ inputs:
 runs:
   using: composite
   steps:
-  - uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
-    id: app-token
-    with:
-      client-id: ${{ inputs.app-client-id }}
-      private-key: ${{ inputs.app-private-key }}
-      permission-contents: write
-      permission-issues: write
-      permission-workflows: write
-      # When run from a PR, it should be in dry-run mode, so shouldn't create PRs.
-      # But if it did, it's not too hard to imagine a PR creation loop. So
-      # let's add another layer of protection.
-      permission-pull-requests: "${{ github.event_name == 'pull_request' && 'read' || 'write' }}"
-      permission-vulnerability-alerts: read
-      repositories: ${{ inputs.repository }}
   - run: '$GITHUB_ACTION_PATH/../../renovate.sh'
     shell: bash
     env:
       RENOVATE_REPOSITORIES: ${{ inputs.repository }}
-      RENOVATE_TOKEN: ${{ steps.app-token.outputs.token }}
+      RENOVATE_TOKEN: ${{ inputs.token }}
       RENOVATE_DRY_RUN: ${{ inputs.dry-run == 'true' && 'full' || 'null' }}
