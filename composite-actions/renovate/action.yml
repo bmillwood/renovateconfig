@@ -1,6 +1,6 @@
 name: Renovate
 description: >-
-  Run Renovate on the given repo with bmillwood's usual configuration. Set
+  Run Renovate on the given repos with bmillwood's usual configuration. Set
   RENOVATE_* environment variables on the step to override or add to it.
 
 inputs:
@@ -8,7 +8,7 @@ inputs:
     required: true
   dry-run:
     default: ${{ github.event_name == 'pull_request' }}
-  repository:
+  repositories:
     default: ${{ github.repository }}
 
 runs:
@@ -17,6 +17,6 @@ runs:
   - run: '$GITHUB_ACTION_PATH/../../renovate.sh'
     shell: bash
     env:
-      RENOVATE_REPOSITORIES: ${{ inputs.repository }}
+      RENOVATE_REPOSITORIES: ${{ inputs.repositories }}
       RENOVATE_TOKEN: ${{ inputs.token }}
       RENOVATE_DRY_RUN: ${{ inputs.dry-run == 'true' && 'full' || 'null' }}

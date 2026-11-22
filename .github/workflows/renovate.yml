@@ -42,4 +42,4 @@ jobs:
       with:
         token: ${{ steps.token.outputs.token }}
         dry-run: ${{ env.DRY_RUN }}
-        repository: ${{ matrix.repo }}
+        repositories: ${{ matrix.repo }}
