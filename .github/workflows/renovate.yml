@@ -14,6 +14,8 @@ on:
 
 jobs:
   upgrade-dependencies:
+    permissions:
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
@@ -24,10 +26,17 @@ jobs:
           - bmillwood/nur-packages
           - bmillwood/skerrible
     runs-on: ubuntu-latest
+    env:
+      DRY_RUN: ${{ inputs.dryRun || github.event_name == 'pull_request' }}
     steps:
+    - uses: octo-sts/action@f603d3be9d8dd9871a265776e625a27b00effe05 # v1.1.1
+      id: token
+      with:
+        domain: sts.rpm.cc
+        scope: bmillwood
+        identity: ${{ env.DRY_RUN == 'true' && 'renovate-dry-run' || 'renovate' }}
     - uses: $/composite-actions/renovate
       with:
-        app-client-id: ${{ secrets.RENOVATE_APP_CLIENT_ID }}
-        app-private-key: ${{ secrets.RENOVATE_APP_PRIVATE_KEY }}
-        dry-run: ${{ inputs.dryRun || github.event_name == 'pull_request' }}
+        token: ${{ steps.token.outputs.token }}
+        dry-run: ${{ env.DRY_RUN }}
         repository: ${{ matrix.repo }}
