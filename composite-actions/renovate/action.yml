@@ -1,6 +1,6 @@
 name: Renovate
 description: >-
-  Run Renovate on the current repo with bmillwood's usual configuration. Set
+  Run Renovate on the given repo with bmillwood's usual configuration. Set
   RENOVATE_* environment variables on the step to override or add to it.
 
 inputs:
