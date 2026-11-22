@@ -31,7 +31,7 @@ jobs:
       id: token
       with:
         domain: sts.rpm.cc
-        scope: ${{ matrix.repo }}
+        scope: bmillwood
         identity: ${{ inputs.dryRun && 'renovate-dry-run' || 'renovate' }}
     - uses: $/composite-actions/renovate
       with:
